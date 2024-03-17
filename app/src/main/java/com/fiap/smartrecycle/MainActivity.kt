@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fiap.smartrecycle.ui.theme.SmartRecycleTheme
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -42,7 +43,8 @@ import com.google.maps.android.compose.rememberMarkerState
 val brazilState = LatLng(-23.5571263654712, -46.5839745016389)
 val defaultCameraPosition = CameraPosition.fromLatLngZoom(brazilState, 4f)
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), OnMapReadyCallback {
+    private var googleMap: GoogleMap? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -55,7 +57,6 @@ class MainActivity : ComponentActivity() {
                     var isMapLoaded by remember {
                         mutableStateOf(false)
                     }
-
                     Box(Modifier.fillMaxSize()) {
                             GoogleMapView(
                                 modifier = Modifier
@@ -80,7 +81,21 @@ class MainActivity : ComponentActivity() {
                     
                 }
             }
-        }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        this.googleMap = googleMap
+        onMapReadyInternal(googleMap)
+    }
+    private fun onMapReadyInternal(googleMap: GoogleMap) {
+        val brSp = brazilState
+        googleMap.addMarker(
+            MarkerOptions()
+                .position(brSp)
+                .title("Loja do Arnaldo - ponto de coleta de eletrônicos")
+        )
+    }
+}
+
 
 @Composable
 fun GoogleMapView(modifier: Modifier = Modifier, cameraPositionState: CameraPositionState, onMapLoaded: () -> Unit) {
@@ -145,16 +160,6 @@ fun GoogleMapView(modifier: Modifier = Modifier, cameraPositionState: CameraPosi
 
     }
 
-}
-
-
-fun onMapReady(googleMap: GoogleMap) {
-    val brSp = LatLng(-23.5571263654712, -46.5839745016389)
-    googleMap.addMarker(
-        MarkerOptions()
-            .position(brSp)
-            .title("Marker in SP")
-    )
 }
 
 @Preview(showBackground = true)
